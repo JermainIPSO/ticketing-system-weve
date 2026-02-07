@@ -5,10 +5,14 @@ on:
     workflows: ["CI"]
     types:
       - completed
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,14 +25,30 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Check Netlify secrets
+        id: netlify
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+        run: |
+          if [ -n "$NETLIFY_AUTH_TOKEN" ] && [ -n "$NETLIFY_SITE_ID" ] && [ -n "$VITE_API_URL" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Netlify deploy skipped: set NETLIFY_AUTH_TOKEN, NETLIFY_SITE_ID, VITE_API_URL."
+          fi
 
       - name: Build frontend
+        if: steps.netlify.outputs.ready == 'true'
         run: npm -w frontend run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       - name: Deploy frontend to Netlify
+        if: steps.netlify.outputs.ready == 'true'
         uses: netlify/actions/cli@v3
         with:
           args: deploy --dir=frontend/dist --prod
@@ -39,3 +59,7 @@ jobs:
       - name: Trigger backend deploy (Render)
         if: ${{ secrets.RENDER_DEPLOY_HOOK_URL != '' }}
         run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
+      - name: Report skipped backend deploy
+        if: ${{ secrets.RENDER_DEPLOY_HOOK_URL == '' }}
+        run: echo "Render deploy skipped: set RENDER_DEPLOY_HOOK_URL."

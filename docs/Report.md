@@ -253,12 +253,20 @@ Damit laufen Tests auf jedem Pull-Request und Deployments nach erfolgreichem Mer
 ```
 
 ### 5.2 Quellen (Auswahl)
-- OWASP Top 10 (Sicherheitsgrundlagen)
-- Prisma Dokumentation (ORM & Schema)
-- React Dokumentation (SPA Architektur)
-- Express Dokumentation (REST APIs)
+- OWASP Foundation: OWASP Top 10, https://owasp.org/www-project-top-ten/
+- Prisma Docs: ORM + Schema, https://www.prisma.io/docs
+- React Docs, https://react.dev
+- Express Docs, https://expressjs.com
+- Node.js Docs, https://nodejs.org/docs/latest/api/
 
 ### 5.3 Links (eintragen)
-- GitHub Repo: <REPO_LINK>
+- GitHub Repo: https://github.com/JermainIPSO/ticketing-system-weve
 - Deployment Frontend: <FRONTEND_LINK>
 - Deployment Backend: <BACKEND_LINK>
+
+### 5.4 Abgabe-Checkliste
+- PDF-Dokument erstellt (inkl. Management Summary, Analyse/Design, Implementation, Lessons Learned, Anhang)
+- Mindestumfang geprueft (mindestens 8 Seiten ohne Management Summary)
+- Source-Code als ZIP erstellt (`npm run package:submission`)
+- GitHub-Repo-Link und Deployment-Links im Dokument eingetragen
+- Upload auf campus.ipso.ch: PDF + ZIP
