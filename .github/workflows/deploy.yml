@@ -49,7 +49,7 @@ jobs:
 
       - name: Deploy frontend to Netlify
         if: steps.netlify.outputs.ready == 'true'
-        uses: netlify/actions/cli@v3
+        uses: netlify/actions/cli@master
         with:
           args: deploy --dir=frontend/dist --prod
         env:
