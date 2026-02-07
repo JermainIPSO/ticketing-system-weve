@@ -1,6 +1,9 @@
 import type { Ticket, TicketPriority, TicketStatus, User } from './types';
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:4000';
+const PROD_API_FALLBACK = 'https://weve-ticketing-api-jermain.onrender.com';
+const API_URL =
+  import.meta.env.VITE_API_URL ??
+  (import.meta.env.DEV ? 'http://localhost:4000' : PROD_API_FALLBACK);
 const TOKEN_KEY = 'ticketing_token';
 const USER_KEY = 'ticketing_user';
 
