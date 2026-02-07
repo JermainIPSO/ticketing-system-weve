@@ -261,8 +261,8 @@ Damit laufen Tests auf jedem Pull-Request und Deployments nach erfolgreichem Mer
 
 ### 5.3 Links (eintragen)
 - GitHub Repo: https://github.com/JermainIPSO/ticketing-system-weve
-- Deployment Frontend: <FRONTEND_LINK>
-- Deployment Backend: <BACKEND_LINK>
+- Deployment Frontend: https://weve-ticketing-system-jermain.netlify.app
+- Deployment Backend: https://weve-ticketing-api-jermain.onrender.com
 
 ### 5.4 Abgabe-Checkliste
 - PDF-Dokument erstellt (inkl. Management Summary, Analyse/Design, Implementation, Lessons Learned, Anhang)
