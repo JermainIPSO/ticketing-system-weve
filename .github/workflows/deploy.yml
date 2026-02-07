@@ -57,9 +57,11 @@ jobs:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
 
       - name: Trigger backend deploy (Render)
-        if: ${{ secrets.RENDER_DEPLOY_HOOK_URL != '' }}
-        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
-
-      - name: Report skipped backend deploy
-        if: ${{ secrets.RENDER_DEPLOY_HOOK_URL == '' }}
-        run: echo "Render deploy skipped: set RENDER_DEPLOY_HOOK_URL."
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -n "$RENDER_DEPLOY_HOOK_URL" ]; then
+            curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL"
+          else
+            echo "Render deploy skipped: set RENDER_DEPLOY_HOOK_URL."
+          fi
