@@ -13,7 +13,7 @@
     "build": "tsup src/index.ts --format esm --dts --sourcemap",
     "start": "node dist/index.js",
     "lint": "node -e \"console.log('lint placeholder')\"",
-    "test": "DATABASE_URL=\"file:./test.db\" prisma db push --skip-generate && DATABASE_URL=\"file:./test.db\" vitest run",
+    "test": "prisma generate && DATABASE_URL=\"file:./test.db\" prisma db push --skip-generate && DATABASE_URL=\"file:./test.db\" vitest run",
     "test:watch": "vitest",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
