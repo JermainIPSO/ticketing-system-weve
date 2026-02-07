@@ -1,0 +1,26 @@
+{
+  "name": "webentwicklung-projektarbeit-vertiefung",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "engines": {
+    "node": ">=20 <24"
+  },
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c green,blue \"npm -w backend run dev\" \"npm -w frontend run dev\"",
+    "db:sync": "npm -w backend run db:sync",
+    "build": "npm -w backend run build && npm -w frontend run build",
+    "test": "npm -w backend test && npm -w frontend test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

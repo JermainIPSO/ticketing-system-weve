@@ -1,0 +1,484 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+  color-scheme: light;
+  --bg-1: #f6f0e9;
+  --bg-2: #eef6f8;
+  --ink: #0f172a;
+  --muted: #5f6b7a;
+  --card: rgba(255, 255, 255, 0.9);
+  --accent: #ff6b35;
+  --accent-2: #36cfc9;
+  --accent-3: #ffb347;
+  --danger: #e04e5f;
+  --border: rgba(15, 23, 42, 0.12);
+  --shadow: 0 30px 70px rgba(15, 23, 42, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Manrope', sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at 20% 20%, #fff4e6, transparent 55%),
+    radial-gradient(circle at 80% 10%, #e2f3f1, transparent 50%),
+    linear-gradient(120deg, var(--bg-1), var(--bg-2));
+  min-height: 100vh;
+  background-attachment: fixed;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: -20%;
+  background: repeating-linear-gradient(
+    130deg,
+    rgba(15, 23, 42, 0.04) 0px,
+    rgba(15, 23, 42, 0.04) 1px,
+    transparent 1px,
+    transparent 12px
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  margin: 0 0 0.6rem;
+}
+
+p {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.hero {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  align-items: start;
+  animation: fadeUp 0.8s ease;
+}
+
+.hero-copy h1 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.05;
+}
+
+.subtitle {
+  max-width: 520px;
+}
+
+.eyebrow {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.2rem;
+}
+
+.hero-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0.75rem 1.2rem;
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.profile span {
+  font-size: 0.85rem;
+  color: var(--muted);
+  display: block;
+}
+
+.grid,
+.login-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  align-items: start;
+  animation: fadeUp 0.9s ease;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) 1fr;
+  gap: 1.5rem;
+  animation: fadeUp 0.9s ease;
+}
+
+.side {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.content {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.card {
+  background: var(--card);
+  padding: 1.8rem;
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+
+.hero-card {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(54, 207, 201, 0.2));
+}
+
+.card.highlight {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.12), rgba(255, 179, 71, 0.15));
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 18px;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 0.4rem;
+}
+
+.stat-card strong {
+  font-size: 1.6rem;
+  color: var(--ink);
+}
+
+.stat-card small {
+  color: var(--muted);
+}
+
+.stat-card.highlight {
+  background: linear-gradient(140deg, rgba(54, 207, 201, 0.2), rgba(255, 255, 255, 0.9));
+}
+
+.form {
+  display: grid;
+  gap: 1rem;
+}
+
+label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.btn {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 12px 24px rgba(255, 107, 53, 0.3);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn.ghost {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: none;
+  border: 1px solid var(--border);
+}
+
+.btn.danger {
+  background: var(--danger);
+  box-shadow: 0 10px 20px rgba(224, 78, 95, 0.3);
+}
+
+.error {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.feature-list {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.feature-list div {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chips span {
+  background: #fff;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  font-weight: 600;
+  border: 1px dashed var(--border);
+}
+
+.demo-accounts {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 16px;
+  border: 1px dashed var(--border);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.ticket-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.ticket {
+  position: relative;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  padding: 1.2rem 1.4rem;
+  display: grid;
+  gap: 0.9rem;
+  background: rgba(255, 255, 255, 0.95);
+  animation: fadeUp 0.6s ease forwards;
+  opacity: 0;
+}
+
+.ticket::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 0 0;
+  border-radius: 20px;
+  border-left: 6px solid transparent;
+}
+
+.ticket.priority-high::before {
+  border-left-color: var(--accent);
+}
+
+.ticket.priority-medium::before {
+  border-left-color: var(--accent-3);
+}
+
+.ticket.priority-low::before {
+  border-left-color: var(--accent-2);
+}
+
+.ticket-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.ticket-eyebrow {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.ticket-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-end;
+}
+
+.ticket-meta {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.badge {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  align-self: flex-start;
+}
+
+.badge.open {
+  background: rgba(255, 107, 53, 0.18);
+  color: #9d3f1b;
+}
+
+.badge.in-progress {
+  background: rgba(54, 207, 201, 0.18);
+  color: #056f66;
+}
+
+.badge.closed {
+  background: rgba(15, 23, 42, 0.12);
+  color: #0f172a;
+}
+
+.pill {
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: rgba(15, 23, 42, 0.08);
+}
+
+.pill.high {
+  background: rgba(255, 107, 53, 0.2);
+  color: #9d3f1b;
+}
+
+.pill.medium {
+  background: rgba(255, 179, 71, 0.2);
+  color: #8a5b11;
+}
+
+.pill.low {
+  background: rgba(54, 207, 201, 0.2);
+  color: #056f66;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.edit-form {
+  background: rgba(54, 207, 201, 0.08);
+  padding: 1rem;
+  border-radius: 16px;
+}
+
+.admin-controls {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border);
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  border-radius: 20px;
+  border: 1px dashed var(--border);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 980px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ticket-tags {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .app {
+    padding: 2rem 1.2rem;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .profile {
+    justify-content: space-between;
+  }
+}
