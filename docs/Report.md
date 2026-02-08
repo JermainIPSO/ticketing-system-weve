@@ -253,7 +253,7 @@ Damit laufen Tests auf jedem Pull-Request und Deployments nach erfolgreichem Mer
 | Admin Ticket-Erstellung | Admin | Direkte Erstellung wird mit 403 abgelehnt | Erfüllt |
 | Ticket annehmen | Admin | Zuweisung auf Admin + Status IN_PROGRESS | Erfüllt |
 | Ticket zuweisen | Admin | `assignedTo` wird gespeichert | Erfüllt |
-| Status ändern | Admin | Statuswechsel OPEN/IN_PROGRESS/CLOSED | Erfüllt |
+| Status ändern | Admin | Statuswechsel OPEN/IN_PROGRESS (Abschluss via separatem Close-Flow) | Erfüllt |
 | Unberechtigter Zugriff | User fremdes Ticket | Zugriff wird mit 403 abgelehnt | Erfüllt |
 | API Health | System | `/health` liefert `status: ok` | Erfüllt |
 
