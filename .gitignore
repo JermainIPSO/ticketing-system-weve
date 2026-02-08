@@ -10,3 +10,4 @@ dist
 dist-submission
 frontend/dist
 backend/dist
+docs/*.pdf
