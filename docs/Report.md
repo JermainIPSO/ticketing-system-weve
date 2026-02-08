@@ -289,14 +289,27 @@ Damit laufen Tests auf jedem Pull-Request und Deployments nach erfolgreichem Mer
 - Deployment Frontend: https://weve-ticketing-system-jermain.netlify.app
 - Deployment Backend: https://weve-ticketing-api-jermain.onrender.com
 
-### 5.4 Abgabe-Checkliste
+### 5.4 Experten-Schnelltest (Live)
+1. Frontend öffnen: https://weve-ticketing-system-jermain.netlify.app  
+2. Mit Demo-Accounts einloggen:  
+   - User: `user / user123`  
+   - Admin: `admin / admin123`  
+3. User erstellt Ticket, bearbeitet Ticket in `OPEN`, schließt Ticket mit Ursache/Lösung.  
+4. Admin übernimmt Ticket, weist zu, setzt Status auf `IN_PROGRESS`, schließt mit Lösungsnotiz.  
+5. Backend Health prüfen: https://weve-ticketing-api-jermain.onrender.com/health  
+
+**Hinweis zur Free-Instanz (Render):** Beim ersten API-Aufruf nach Inaktivität kann das Aufwachen bis zu ca. 50 Sekunden dauern.
+
+**Erwartetes Verhalten:** Die Backend-Root-URL (`/`) liefert `{"message":"Not Found"}`. Das ist korrekt; relevante Endpunkte sind z. B. `/health`, `/auth/login`, `/tickets`.
+
+### 5.5 Abgabe-Checkliste
 - PDF-Dokument erstellt (inkl. Management Summary, Analyse/Design, Implementation, Lessons Learned, Anhang)
 - Mindestumfang geprueft (mindestens 8 Seiten ohne Management Summary)
 - Source-Code als ZIP erstellt (`npm run package:submission`)
 - GitHub-Repo-Link und Deployment-Links im Dokument eingetragen
 - Upload auf campus.ipso.ch: PDF + ZIP
 
-### 5.5 Selbstcheck gegen Bewertungskriterien
+### 5.6 Selbstcheck gegen Bewertungskriterien
 | Kriterium | Nachweis in dieser Arbeit |
 |---|---|
 | Formale Aspekte | Vollständige Gliederung, klare Fachbegriffe, Quellen, professionelle Sprache |
