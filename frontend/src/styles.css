@@ -326,6 +326,7 @@ textarea {
   inset: 0 0 0 0;
   border-radius: 20px;
   border-left: 6px solid transparent;
+  pointer-events: none;
 }
 
 .ticket.priority-high::before {
