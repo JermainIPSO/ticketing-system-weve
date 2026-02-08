@@ -29,9 +29,24 @@ const assignSchema = z.object({
   assignedTo: z.string().min(2)
 });
 
-const statusSchema = z.object({
-  status: statusEnum
+const closeSchema = z.object({
+  resolutionNote: z.string().trim().min(10).max(2000)
 });
+
+const statusSchema = z
+  .object({
+    status: statusEnum,
+    resolutionNote: z.string().trim().min(10).max(2000).optional()
+  })
+  .superRefine((payload, ctx) => {
+    if (payload.status === 'CLOSED' && !payload.resolutionNote) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['resolutionNote'],
+        message: 'resolutionNote is required when closing a ticket.'
+      });
+    }
+  });
 
 router.use(requireAuth);
 
@@ -77,6 +92,12 @@ router.post(
   '/',
   asyncHandler(async (req, res) => {
     const user = req.user!;
+    if (user.role === 'admin') {
+      return res
+        .status(403)
+        .json({ message: 'Admins can not create tickets directly.' });
+    }
+
     const payload = createSchema.parse(req.body);
 
     const ticket = await prisma.ticket.create({
@@ -106,8 +127,14 @@ router.patch(
       return res.status(404).json({ message: 'Ticket not found.' });
     }
 
-    if (user.role !== 'admin' && ticket.createdBy !== user.username) {
+    if (ticket.createdBy !== user.username) {
       return res.status(403).json({ message: 'Forbidden.' });
+    }
+
+    if (ticket.status !== 'OPEN') {
+      return res.status(409).json({
+        message: 'Ticket content can only be edited while status is OPEN.'
+      });
     }
 
     const updated = await prisma.ticket.update({
@@ -135,9 +162,15 @@ router.post(
       return res.status(403).json({ message: 'Forbidden.' });
     }
 
+    const payload = closeSchema.parse(req.body);
+
     const closed = await prisma.ticket.update({
       where: { id: req.params.id },
-      data: { status: 'CLOSED', closedAt: new Date() }
+      data: {
+        status: 'CLOSED',
+        closedAt: new Date(),
+        resolutionNote: payload.resolutionNote
+      }
     });
 
     return res.json(closed);
@@ -183,7 +216,8 @@ router.patch(
       where: { id: req.params.id },
       data: {
         status: payload.status,
-        closedAt: payload.status === 'CLOSED' ? new Date() : null
+        closedAt: payload.status === 'CLOSED' ? new Date() : null,
+        resolutionNote: payload.status === 'CLOSED' ? payload.resolutionNote : null
       }
     });
 

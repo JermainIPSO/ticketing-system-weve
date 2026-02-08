@@ -14,6 +14,7 @@ import type { Ticket, TicketPriority, TicketStatus, User } from './types';
 
 const priorities: TicketPriority[] = ['LOW', 'MEDIUM', 'HIGH'];
 const statuses: TicketStatus[] = ['OPEN', 'IN_PROGRESS', 'CLOSED'];
+const adminStatuses: TicketStatus[] = ['OPEN', 'IN_PROGRESS'];
 
 const formatDate = (value?: string | null) =>
   value ? new Date(value).toLocaleString() : '-';
@@ -41,6 +42,7 @@ function App() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [busyTicketIds, setBusyTicketIds] = useState<Record<string, boolean>>({});
   const [assignDrafts, setAssignDrafts] = useState<Record<string, string>>({});
+  const [closeDrafts, setCloseDrafts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
@@ -49,6 +51,7 @@ function App() {
   const [createForm, setCreateForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState(emptyForm);
+  const [closingId, setClosingId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | TicketStatus>('ALL');
   const [priorityFilter, setPriorityFilter] = useState<'ALL' | TicketPriority>('ALL');
@@ -75,6 +78,10 @@ function App() {
       ...prev,
       [updated.id]: updated.assignedTo ?? ''
     }));
+    setCloseDrafts((prev) => ({
+      ...prev,
+      [updated.id]: updated.resolutionNote ?? ''
+    }));
   };
 
   const loadTickets = useCallback(async () => {
@@ -87,6 +94,13 @@ function App() {
         const next: Record<string, string> = {};
         for (const ticket of data) {
           next[ticket.id] = prev[ticket.id] ?? ticket.assignedTo ?? '';
+        }
+        return next;
+      });
+      setCloseDrafts((prev) => {
+        const next: Record<string, string> = {};
+        for (const ticket of data) {
+          next[ticket.id] = prev[ticket.id] ?? ticket.resolutionNote ?? '';
         }
         return next;
       });
@@ -131,12 +145,18 @@ function App() {
     setUser(null);
     setTickets([]);
     setAssignDrafts({});
+    setCloseDrafts({});
     setBusyTicketIds({});
+    setClosingId(null);
   };
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+    if (isAdmin) {
+      setError('Admins können keine Tickets direkt erstellen.');
+      return;
+    }
     const title = createForm.title.trim();
     const description = createForm.description.trim();
     if (title.length < 3) {
@@ -204,12 +224,31 @@ function App() {
     }
   };
 
+  const startClose = (ticket: Ticket) => {
+    setClosingId(ticket.id);
+    setCloseDrafts((prev) => ({
+      ...prev,
+      [ticket.id]: prev[ticket.id] ?? ticket.resolutionNote ?? ''
+    }));
+  };
+
+  const cancelClose = () => {
+    setClosingId(null);
+  };
+
   const closeTicket = async (ticketId: string) => {
+    const resolutionNote = (closeDrafts[ticketId] ?? '').trim();
+    if (resolutionNote.length < 10) {
+      setError('Bitte mindestens 10 Zeichen für Ursache/Lösung eingeben.');
+      return;
+    }
+
     setError(null);
     setTicketBusy(ticketId, true);
     try {
-      const updated = await api.closeTicket(ticketId);
+      const updated = await api.closeTicket(ticketId, resolutionNote);
       upsertTicket(updated);
+      setClosingId(null);
       await loadTickets();
     } catch (err) {
       setError(toErrorMessage(err, 'Unable to close ticket.'));
@@ -446,66 +485,80 @@ function App() {
       ) : (
         <main className="dashboard">
           <aside className="side">
-            <section className="card">
-              <h2>Neues Ticket</h2>
-              <form className="form" onSubmit={handleCreate}>
-                <label>
-                  Titel
-                  <input
-                    type="text"
-                    value={createForm.title}
-                    minLength={3}
-                    maxLength={120}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        title: event.target.value
-                      }))
-                    }
-                    required
-                  />
-                  <small className="hint">Mindestens 3 Zeichen</small>
-                </label>
-                <label>
-                  Beschreibung
-                  <textarea
-                    rows={4}
-                    value={createForm.description}
-                    minLength={10}
-                    maxLength={2000}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        description: event.target.value
-                      }))
-                    }
-                    required
-                  />
-                  <small className="hint">Mindestens 10 Zeichen</small>
-                </label>
-                <label>
-                  Priorität
-                  <select
-                    value={createForm.priority}
-                    onChange={(event) =>
-                      setCreateForm((prev) => ({
-                        ...prev,
-                        priority: event.target.value as TicketPriority
-                      }))
-                    }
-                  >
-                    {priorities.map((priority) => (
-                      <option key={priority} value={priority}>
-                        {priority}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <button className="btn" type="submit">
-                  Ticket erstellen
-                </button>
-              </form>
-            </section>
+            {!isAdmin ? (
+              <section className="card">
+                <h2>Neues Ticket</h2>
+                <form className="form" onSubmit={handleCreate}>
+                  <label>
+                    Titel
+                    <input
+                      type="text"
+                      value={createForm.title}
+                      minLength={3}
+                      maxLength={120}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          title: event.target.value
+                        }))
+                      }
+                      required
+                    />
+                    <small className="hint">Mindestens 3 Zeichen</small>
+                  </label>
+                  <label>
+                    Beschreibung
+                    <textarea
+                      rows={4}
+                      value={createForm.description}
+                      minLength={10}
+                      maxLength={2000}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          description: event.target.value
+                        }))
+                      }
+                      required
+                    />
+                    <small className="hint">Mindestens 10 Zeichen</small>
+                  </label>
+                  <label>
+                    Priorität
+                    <select
+                      value={createForm.priority}
+                      onChange={(event) =>
+                        setCreateForm((prev) => ({
+                          ...prev,
+                          priority: event.target.value as TicketPriority
+                        }))
+                      }
+                    >
+                      {priorities.map((priority) => (
+                        <option key={priority} value={priority}>
+                          {priority}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button className="btn" type="submit">
+                    Ticket erstellen
+                  </button>
+                </form>
+              </section>
+            ) : (
+              <section className="card">
+                <h2>Admin-Modus</h2>
+                <p>
+                  Tickets werden ausschliesslich durch User ausgelöst. Als Admin übernimmst
+                  du Zuweisung, Status und Abschlussdokumentation.
+                </p>
+                <p className="muted">
+                  Dadurch bleiben Auslöser, Bearbeitung und Lösung im Prozess klar
+                  getrennt.
+                </p>
+              </section>
+            )}
 
             <section className="card insight">
               <h3>Service-Insights</h3>
@@ -595,10 +648,14 @@ function App() {
                 {visibleTickets.map((ticket, index) => {
                   const ticketBusy = isTicketBusy(ticket.id);
                   const assignDraft = assignDrafts[ticket.id] ?? ticket.assignedTo ?? '';
+                  const closeDraft = closeDrafts[ticket.id] ?? ticket.resolutionNote ?? '';
+                  const isOwner = !!user && ticket.createdBy === user.username;
+                  const canEditTicket = isOwner && ticket.status === 'OPEN';
                   const canCloseTicket =
                     ticket.status !== 'CLOSED' &&
                     !!user &&
-                    (isAdmin || ticket.createdBy === user.username);
+                    (isAdmin || isOwner);
+                  const isClosing = closingId === ticket.id;
 
                   return (
                     <article
@@ -628,6 +685,7 @@ function App() {
                       <span>Erstellt: {formatDate(ticket.createdAt)}</span>
                       <span>Aktualisiert: {formatDate(ticket.updatedAt)}</span>
                       <span>Closed: {formatDate(ticket.closedAt)}</span>
+                      <span>Lösung/Ursache: {ticket.resolutionNote ?? '-'}</span>
                       <span>Zuweisung: {ticket.assignedTo ?? '-'} </span>
                     </div>
 
@@ -704,24 +762,67 @@ function App() {
                       </div>
                     ) : (
                       <div className="actions">
-                        <button
-                          className="btn ghost"
-                          type="button"
-                          disabled={ticketBusy}
-                          onClick={() => startEdit(ticket)}
-                        >
-                          Bearbeiten
-                        </button>
+                        {canEditTicket && (
+                          <button
+                            className="btn ghost"
+                            type="button"
+                            disabled={ticketBusy}
+                            onClick={() => startEdit(ticket)}
+                          >
+                            Bearbeiten
+                          </button>
+                        )}
                         {canCloseTicket && (
+                          <button
+                            className="btn danger"
+                            type="button"
+                            disabled={ticketBusy}
+                            onClick={() => startClose(ticket)}
+                          >
+                            {ticketBusy ? 'Bitte warten…' : 'Schließen mit Lösung'}
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {isClosing && (
+                      <div className="form edit-form close-form">
+                        <label>
+                          Ursache / Lösung
+                          <textarea
+                            rows={3}
+                            value={closeDraft}
+                            minLength={10}
+                            maxLength={2000}
+                            onChange={(event) =>
+                              setCloseDrafts((prev) => ({
+                                ...prev,
+                                [ticket.id]: event.target.value
+                              }))
+                            }
+                          />
+                          <small className="hint">
+                            Pflichtfeld: mindestens 10 Zeichen zur Lösungsdokumentation.
+                          </small>
+                        </label>
+                        <div className="actions">
                           <button
                             className="btn danger"
                             type="button"
                             disabled={ticketBusy}
                             onClick={() => closeTicket(ticket.id)}
                           >
-                            {ticketBusy ? 'Bitte warten…' : 'Ticket schließen'}
+                            {ticketBusy ? 'Bitte warten…' : 'Abschluss speichern'}
                           </button>
-                        )}
+                          <button
+                            className="btn ghost"
+                            type="button"
+                            disabled={ticketBusy}
+                            onClick={cancelClose}
+                          >
+                            Abbrechen
+                          </button>
+                        </div>
                       </div>
                     )}
 
@@ -766,12 +867,15 @@ function App() {
                           Status
                           <select
                             value={ticket.status}
-                            disabled={ticketBusy}
+                            disabled={ticketBusy || ticket.status === 'CLOSED'}
                             onChange={(event) =>
                               updateStatus(ticket.id, event.target.value as TicketStatus)
                             }
                           >
-                            {statuses.map((status) => (
+                            {(ticket.status === 'CLOSED'
+                              ? statuses
+                              : adminStatuses
+                            ).map((status) => (
                               <option key={status} value={status}>
                                 {status}
                               </option>

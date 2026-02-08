@@ -10,7 +10,7 @@
 
 Ich habe ein webbasiertes Ticketing-System entwickelt, das den Kundensupport eines mittelständischen Unternehmens effizienter, transparenter und skalierbarer macht. Die Lösung besteht aus einer React Single Page Application (SPA) und einer Node.js/Express REST-API mit zentraler Datenhaltung via Prisma. Lokal nutze ich SQLite, in Produktion ist ein Wechsel auf Postgres über die `DATABASE_URL` vorgesehen.
 
-Das System erfüllt alle Kernanforderungen: Benutzer erstellen, aktualisieren und schließen Tickets; Admins weisen Tickets zu und ändern den Status. Die Architektur ist klar getrennt (Frontend, Backend, Datenbank), was Wartbarkeit und Skalierbarkeit verbessert. Sicherheit und Stabilität werden durch JWT-Authentifizierung, Input-Validierung (Zod), Rate Limiting, CORS-Policies und sichere Standard-Header (Helmet) unterstützt. Die UI bietet eine übersichtliche Ticketliste mit Filter, Suche und Prioritäten, sodass der Support-Alltag schnell und strukturiert abläuft.
+Das System erfüllt alle Kernanforderungen: Benutzer erstellen, aktualisieren und schließen Tickets; Admins weisen Tickets zu und ändern den Status. Zusätzlich habe ich fachliche Prozessregeln umgesetzt: Tickets werden nur durch User ausgelöst, Ticketinhalte sind nur im Status `OPEN` durch den Auslöser editierbar und beim Schließen ist eine verpflichtende Lösungsnotiz zu erfassen. Die Architektur ist klar getrennt (Frontend, Backend, Datenbank), was Wartbarkeit und Skalierbarkeit verbessert. Sicherheit und Stabilität werden durch JWT-Authentifizierung, Input-Validierung (Zod), Rate Limiting, CORS-Policies und sichere Standard-Header (Helmet) unterstützt. Die UI bietet eine übersichtliche Ticketliste mit Filter, Suche und Prioritäten, sodass der Support-Alltag schnell und strukturiert abläuft.
 
 Für Qualitätssicherung habe ich Unit- und Integrationstests implementiert und eine CI/CD-Pipeline in GitHub Actions aufgebaut. Jeder Pull-Request wird getestet; auf `main` wird automatisch deployt (Frontend über Netlify, Backend via Render Deploy Hook). Die Lösung ist praxistauglich, leicht erweiterbar (SLA, Reporting, Rollen) und bereit für eine produktive Weiterentwicklung.
 
@@ -94,6 +94,7 @@ flowchart LR
 2. **User – Ticket schließen:** Als Benutzer schließe ich mein Ticket, wenn das Problem gelöst ist.
 3. **Admin – Ticket zuweisen:** Als Admin weise ich Tickets einem Support-Mitarbeiter zu.
 4. **Admin – Status ändern:** Als Admin setze ich den Status auf „In Arbeit“ oder „Closed“.
+5. **Abschlussdokumentation:** Als Bearbeiter erfasse ich beim Schließen eine Ursache/Lösung, damit der Fall auditierbar ist.
 
 ### 2.8 Risiken und Maßnahmen
 - **Risiko:** Unklare API-Verträge führen zu Fehlern im Frontend.  
@@ -133,6 +134,7 @@ flowchart LR
 - Rollenlogik (User/Admin)
 - Validierung und strukturierte Fehlerbehandlung
 - Sichere Defaults (Helmet, Rate Limiting, CORS)
+- Prozessregeln (Owner-Edit nur `OPEN`, Pflicht-Lösungsnotiz bei Abschluss)
 
 ### 3.5 Datenmodell
 ```mermaid
@@ -145,6 +147,7 @@ classDiagram
     +TicketPriority priority
     +string createdBy
     +string? assignedTo
+    +string? resolutionNote
     +DateTime createdAt
     +DateTime updatedAt
     +DateTime? closedAt
@@ -170,11 +173,11 @@ classDiagram
 |---|---|---|---|
 | POST | `/auth/login` | Login & JWT | Alle |
 | GET | `/tickets` | Tickets listen | User/Admin |
-| POST | `/tickets` | Ticket erstellen | User/Admin |
-| PATCH | `/tickets/:id` | Ticket bearbeiten | Owner/Admin |
-| POST | `/tickets/:id/close` | Ticket schließen | Owner/Admin |
+| POST | `/tickets` | Ticket erstellen | User |
+| PATCH | `/tickets/:id` | Ticket bearbeiten (nur `OPEN`) | Owner |
+| POST | `/tickets/:id/close` | Ticket schließen (mit `resolutionNote`) | Owner/Admin |
 | POST | `/tickets/:id/assign` | Ticket zuweisen | Admin |
-| PATCH | `/tickets/:id/status` | Status ändern | Admin |
+| PATCH | `/tickets/:id/status` | Status ändern (`OPEN`/`IN_PROGRESS`) | Admin |
 
 ### 3.7 Tests
 - **Frontend (Unit):** Render-Tests der Login-Ansicht
@@ -244,8 +247,10 @@ Damit laufen Tests auf jedem Pull-Request und Deployments nach erfolgreichem Mer
 |---|---|---|---|
 | Login mit Demo-Account | User/Admin | JWT wird erstellt, Dashboard lädt | Erfüllt |
 | Ticket erstellen | User | Ticket erscheint in Liste mit OPEN | Erfüllt |
-| Ticket bearbeiten | User (Owner) | Titel/Beschreibung/Priorität speicherbar | Erfüllt |
+| Ticket bearbeiten | User (Owner) | Titel/Beschreibung/Priorität nur in OPEN speicherbar | Erfüllt |
 | Ticket schließen | User (Owner) | Status wird CLOSED, Closed-Datum gesetzt | Erfüllt |
+| Abschlussnotiz | User/Admin | Ohne Ursache/Lösung kein Abschluss möglich | Erfüllt |
+| Admin Ticket-Erstellung | Admin | Direkte Erstellung wird mit 403 abgelehnt | Erfüllt |
 | Ticket annehmen | Admin | Zuweisung auf Admin + Status IN_PROGRESS | Erfüllt |
 | Ticket zuweisen | Admin | `assignedTo` wird gespeichert | Erfüllt |
 | Status ändern | Admin | Statuswechsel OPEN/IN_PROGRESS/CLOSED | Erfüllt |

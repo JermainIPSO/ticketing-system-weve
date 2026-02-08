@@ -17,6 +17,7 @@ export type Ticket = {
   priority: TicketPriority;
   createdBy: string;
   assignedTo?: string | null;
+  resolutionNote?: string | null;
   createdAt: string;
   updatedAt: string;
   closedAt?: string | null;

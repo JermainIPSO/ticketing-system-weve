@@ -12,9 +12,17 @@ export const ensureSchema = async () => {
       priority TEXT NOT NULL DEFAULT 'MEDIUM',
       createdBy TEXT NOT NULL,
       assignedTo TEXT,
+      resolutionNote TEXT,
       closedAt DATETIME,
       createdAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
   `);
+
+  // Keep local SQLite schema compatible when the table already exists.
+  try {
+    await prisma.$executeRawUnsafe(`ALTER TABLE Ticket ADD COLUMN resolutionNote TEXT;`);
+  } catch {
+    // Column already exists.
+  }
 };

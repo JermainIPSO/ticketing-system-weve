@@ -102,16 +102,19 @@ export const api = {
       method: 'PATCH',
       body: JSON.stringify(payload)
     }),
-  closeTicket: (id: string) =>
-    request<Ticket>(`/tickets/${id}/close`, { method: 'POST' }),
+  closeTicket: (id: string, resolutionNote: string) =>
+    request<Ticket>(`/tickets/${id}/close`, {
+      method: 'POST',
+      body: JSON.stringify({ resolutionNote })
+    }),
   assignTicket: (id: string, assignedTo: string) =>
     request<Ticket>(`/tickets/${id}/assign`, {
       method: 'POST',
       body: JSON.stringify({ assignedTo })
     }),
-  updateStatus: (id: string, status: TicketStatus) =>
+  updateStatus: (id: string, status: TicketStatus, resolutionNote?: string) =>
     request<Ticket>(`/tickets/${id}/status`, {
       method: 'PATCH',
-      body: JSON.stringify({ status })
+      body: JSON.stringify({ status, resolutionNote })
     })
 };

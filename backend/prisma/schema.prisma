@@ -29,6 +29,7 @@ model Ticket {
   priority    TicketPriority @default(MEDIUM)
   createdBy   String
   assignedTo  String?
+  resolutionNote String?
   closedAt    DateTime?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
