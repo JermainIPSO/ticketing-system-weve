@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useMemo, useState } from 'react';
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import './styles.css';
 import {
   api,
@@ -32,11 +32,15 @@ const priorityRank: Record<TicketPriority, number> = {
 
 const statusClass = (status: TicketStatus) => status.toLowerCase().replace('_', '-');
 const priorityClass = (priority: TicketPriority) => priority.toLowerCase();
+const toErrorMessage = (err: unknown, fallback: string) =>
+  err instanceof Error ? err.message : fallback;
 
 function App() {
   const [user, setUser] = useState<User | null>(getStoredUser());
   const [token, setToken] = useState<string | null>(getStoredToken());
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [busyTicketIds, setBusyTicketIds] = useState<Record<string, boolean>>({});
+  const [assignDrafts, setAssignDrafts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
@@ -52,25 +56,53 @@ function App() {
 
   const isAdmin = user?.role === 'admin';
 
-  useEffect(() => {
-    setAuthToken(token);
-    if (token) {
-      void loadTickets();
-    }
-  }, [token]);
+  const setTicketBusy = (ticketId: string, busy: boolean) => {
+    setBusyTicketIds((prev) => {
+      if (busy) {
+        return { ...prev, [ticketId]: true };
+      }
+      const next = { ...prev };
+      delete next[ticketId];
+      return next;
+    });
+  };
 
-  const loadTickets = async () => {
+  const isTicketBusy = (ticketId: string) => Boolean(busyTicketIds[ticketId]);
+
+  const upsertTicket = (updated: Ticket) => {
+    setTickets((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+    setAssignDrafts((prev) => ({
+      ...prev,
+      [updated.id]: updated.assignedTo ?? ''
+    }));
+  };
+
+  const loadTickets = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await api.getTickets();
       setTickets(data);
+      setAssignDrafts((prev) => {
+        const next: Record<string, string> = {};
+        for (const ticket of data) {
+          next[ticket.id] = prev[ticket.id] ?? ticket.assignedTo ?? '';
+        }
+        return next;
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load tickets.');
+      setError(toErrorMessage(err, 'Failed to load tickets.'));
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    setAuthToken(token);
+    if (token) {
+      void loadTickets();
+    }
+  }, [token, loadTickets]);
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -78,24 +110,28 @@ function App() {
     setLoginError(null);
     try {
       const response = await api.login(loginForm.username, loginForm.password);
+      setAuthToken(response.token);
       storeToken(response.token);
       storeUser(response.user);
       setToken(response.token);
       setUser(response.user);
       setLoginForm({ username: '', password: '' });
     } catch (err) {
-      setLoginError(err instanceof Error ? err.message : 'Login failed.');
+      setLoginError(toErrorMessage(err, 'Login failed.'));
     } finally {
       setLoginLoading(false);
     }
   };
 
   const handleLogout = () => {
+    setAuthToken(null);
     clearToken();
     clearUser();
     setToken(null);
     setUser(null);
     setTickets([]);
+    setAssignDrafts({});
+    setBusyTicketIds({});
   };
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
@@ -104,9 +140,10 @@ function App() {
     try {
       const ticket = await api.createTicket(createForm);
       setTickets((prev) => [ticket, ...prev]);
+      setAssignDrafts((prev) => ({ ...prev, [ticket.id]: ticket.assignedTo ?? '' }));
       setCreateForm(emptyForm);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to create ticket.');
+      setError(toErrorMessage(err, 'Unable to create ticket.'));
     }
   };
 
@@ -126,42 +163,83 @@ function App() {
 
   const saveEdit = async (ticketId: string) => {
     setError(null);
+    setTicketBusy(ticketId, true);
     try {
       const updated = await api.updateTicket(ticketId, editForm);
-      setTickets((prev) => prev.map((item) => (item.id === ticketId ? updated : item)));
+      upsertTicket(updated);
       cancelEdit();
+      await loadTickets();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to update ticket.');
+      setError(toErrorMessage(err, 'Unable to update ticket.'));
+    } finally {
+      setTicketBusy(ticketId, false);
     }
   };
 
   const closeTicket = async (ticketId: string) => {
     setError(null);
+    setTicketBusy(ticketId, true);
     try {
       const updated = await api.closeTicket(ticketId);
-      setTickets((prev) => prev.map((item) => (item.id === ticketId ? updated : item)));
+      upsertTicket(updated);
+      await loadTickets();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to close ticket.');
+      setError(toErrorMessage(err, 'Unable to close ticket.'));
+    } finally {
+      setTicketBusy(ticketId, false);
     }
   };
 
   const assignTicket = async (ticketId: string, assignedTo: string) => {
+    const normalized = assignedTo.trim();
+    if (normalized.length < 2) {
+      setError('Zuweisung muss mindestens 2 Zeichen haben.');
+      return;
+    }
+
     setError(null);
+    setTicketBusy(ticketId, true);
     try {
-      const updated = await api.assignTicket(ticketId, assignedTo);
-      setTickets((prev) => prev.map((item) => (item.id === ticketId ? updated : item)));
+      const updated = await api.assignTicket(ticketId, normalized);
+      upsertTicket(updated);
+      await loadTickets();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to assign ticket.');
+      setError(toErrorMessage(err, 'Unable to assign ticket.'));
+    } finally {
+      setTicketBusy(ticketId, false);
     }
   };
 
   const updateStatus = async (ticketId: string, status: TicketStatus) => {
     setError(null);
+    setTicketBusy(ticketId, true);
     try {
       const updated = await api.updateStatus(ticketId, status);
-      setTickets((prev) => prev.map((item) => (item.id === ticketId ? updated : item)));
+      upsertTicket(updated);
+      await loadTickets();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to update status.');
+      setError(toErrorMessage(err, 'Unable to update status.'));
+    } finally {
+      setTicketBusy(ticketId, false);
+    }
+  };
+
+  const takeTicket = async (ticketId: string) => {
+    if (!user) return;
+
+    const assignedTo = user.username;
+    setAssignDrafts((prev) => ({ ...prev, [ticketId]: assignedTo }));
+    setError(null);
+    setTicketBusy(ticketId, true);
+    try {
+      await api.assignTicket(ticketId, assignedTo);
+      const updated = await api.updateStatus(ticketId, 'IN_PROGRESS');
+      upsertTicket(updated);
+      await loadTickets();
+    } catch (err) {
+      setError(toErrorMessage(err, 'Unable to take ticket.'));
+    } finally {
+      setTicketBusy(ticketId, false);
     }
   };
 
@@ -467,12 +545,20 @@ function App() {
               </div>
             ) : (
               <div className="ticket-list">
-                {visibleTickets.map((ticket, index) => (
-                  <article
-                    key={ticket.id}
-                    className={`ticket priority-${priorityClass(ticket.priority)}`}
-                    style={{ animationDelay: `${index * 0.04}s` }}
-                  >
+                {visibleTickets.map((ticket, index) => {
+                  const ticketBusy = isTicketBusy(ticket.id);
+                  const assignDraft = assignDrafts[ticket.id] ?? ticket.assignedTo ?? '';
+                  const canCloseTicket =
+                    ticket.status !== 'CLOSED' &&
+                    !!user &&
+                    (isAdmin || ticket.createdBy === user.username);
+
+                  return (
+                    <article
+                      key={ticket.id}
+                      className={`ticket priority-${priorityClass(ticket.priority)}`}
+                      style={{ animationDelay: `${index * 0.04}s` }}
+                    >
                     <div className="ticket-top">
                       <div>
                         <p className="ticket-eyebrow">
@@ -548,13 +634,15 @@ function App() {
                           <button
                             className="btn"
                             type="button"
+                            disabled={ticketBusy}
                             onClick={() => saveEdit(ticket.id)}
                           >
-                            Speichern
+                            {ticketBusy ? 'Speichern…' : 'Speichern'}
                           </button>
                           <button
                             className="btn ghost"
                             type="button"
+                            disabled={ticketBusy}
                             onClick={cancelEdit}
                           >
                             Abbrechen
@@ -563,15 +651,22 @@ function App() {
                       </div>
                     ) : (
                       <div className="actions">
-                        <button className="btn ghost" onClick={() => startEdit(ticket)}>
+                        <button
+                          className="btn ghost"
+                          type="button"
+                          disabled={ticketBusy}
+                          onClick={() => startEdit(ticket)}
+                        >
                           Bearbeiten
                         </button>
-                        {ticket.status !== 'CLOSED' && (
+                        {canCloseTicket && (
                           <button
                             className="btn danger"
+                            type="button"
+                            disabled={ticketBusy}
                             onClick={() => closeTicket(ticket.id)}
                           >
-                            Ticket schließen
+                            {ticketBusy ? 'Bitte warten…' : 'Ticket schließen'}
                           </button>
                         )}
                       </div>
@@ -584,17 +679,38 @@ function App() {
                           <input
                             type="text"
                             placeholder="support.agent"
-                            defaultValue={ticket.assignedTo ?? ''}
-                            onBlur={(event) =>
-                              event.target.value &&
-                              assignTicket(ticket.id, event.target.value)
+                            value={assignDraft}
+                            onChange={(event) =>
+                              setAssignDrafts((prev) => ({
+                                ...prev,
+                                [ticket.id]: event.target.value
+                              }))
                             }
                           />
                         </label>
+                        <div className="admin-actions">
+                          <button
+                            className="btn ghost"
+                            type="button"
+                            disabled={ticketBusy || ticket.status === 'CLOSED'}
+                            onClick={() => takeTicket(ticket.id)}
+                          >
+                            Annehmen
+                          </button>
+                          <button
+                            className="btn ghost"
+                            type="button"
+                            disabled={ticketBusy || assignDraft.trim().length < 2}
+                            onClick={() => assignTicket(ticket.id, assignDraft)}
+                          >
+                            Zuweisung speichern
+                          </button>
+                        </div>
                         <label>
                           Status
                           <select
                             value={ticket.status}
+                            disabled={ticketBusy}
                             onChange={(event) =>
                               updateStatus(ticket.id, event.target.value as TicketStatus)
                             }
@@ -609,7 +725,8 @@ function App() {
                       </div>
                     )}
                   </article>
-                ))}
+                  );
+                })}
               </div>
             )}
           </section>

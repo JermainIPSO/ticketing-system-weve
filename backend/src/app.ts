@@ -10,11 +10,29 @@ import ticketsRoutes from './routes/tickets';
 import { env } from './lib/env';
 
 export const app = express();
+const configuredOrigins = env.CORS_ORIGIN.split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedOrigins = new Set([
+  ...configuredOrigins,
+  'http://localhost:5173',
+  'http://127.0.0.1:5173'
+]);
+const netlifyOriginPattern = /^https:\/\/[a-z0-9-]+\.netlify\.app$/i;
+
+const isAllowedOrigin = (origin: string) =>
+  allowedOrigins.has(origin) || netlifyOriginPattern.test(origin);
 
 app.use(helmet());
 app.use(
   cors({
-    origin: env.CORS_ORIGIN,
+    origin: (origin, callback) => {
+      // Allow server-to-server requests without an Origin header.
+      if (!origin || isAllowedOrigin(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Origin not allowed by CORS'));
+    },
     credentials: true
   })
 );
@@ -45,6 +63,10 @@ app.use(
     res: express.Response,
     _next: express.NextFunction
   ) => {
+    if (err.message === 'Origin not allowed by CORS') {
+      return res.status(403).json({ message: err.message });
+    }
+
     if (err instanceof ZodError) {
       return res.status(400).json({
         message: 'Validation failed',

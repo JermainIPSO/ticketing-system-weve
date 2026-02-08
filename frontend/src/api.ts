@@ -32,17 +32,22 @@ export const setAuthToken = (token: string | null) => {
 };
 
 const request = async <T>(path: string, options: RequestInit = {}) => {
-  const response = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-      ...(options.headers ?? {})
-    }
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        ...(options.headers ?? {})
+      }
+    });
+  } catch {
+    throw new Error(`API nicht erreichbar (${API_URL}). Bitte Backend/CORS prüfen.`);
+  }
 
   if (!response.ok) {
-    const payload = await response.json().catch(() => ({}));
+    const payload = await response.json().catch(() => ({} as { message?: string }));
     const message = payload?.message ?? 'Request failed';
     throw new Error(message);
   }
