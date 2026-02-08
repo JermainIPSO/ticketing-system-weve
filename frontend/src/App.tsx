@@ -137,8 +137,22 @@ function App() {
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+    const title = createForm.title.trim();
+    const description = createForm.description.trim();
+    if (title.length < 3) {
+      setError('Titel muss mindestens 3 Zeichen haben.');
+      return;
+    }
+    if (description.length < 10) {
+      setError('Beschreibung muss mindestens 10 Zeichen haben.');
+      return;
+    }
     try {
-      const ticket = await api.createTicket(createForm);
+      const ticket = await api.createTicket({
+        ...createForm,
+        title,
+        description
+      });
       setTickets((prev) => [ticket, ...prev]);
       setAssignDrafts((prev) => ({ ...prev, [ticket.id]: ticket.assignedTo ?? '' }));
       setCreateForm(emptyForm);
@@ -163,9 +177,23 @@ function App() {
 
   const saveEdit = async (ticketId: string) => {
     setError(null);
+    const title = editForm.title.trim();
+    const description = editForm.description.trim();
+    if (title.length < 3) {
+      setError('Titel muss mindestens 3 Zeichen haben.');
+      return;
+    }
+    if (description.length < 10) {
+      setError('Beschreibung muss mindestens 10 Zeichen haben.');
+      return;
+    }
     setTicketBusy(ticketId, true);
     try {
-      const updated = await api.updateTicket(ticketId, editForm);
+      const updated = await api.updateTicket(ticketId, {
+        ...editForm,
+        title,
+        description
+      });
       upsertTicket(updated);
       cancelEdit();
       await loadTickets();
@@ -417,6 +445,8 @@ function App() {
                   <input
                     type="text"
                     value={createForm.title}
+                    minLength={3}
+                    maxLength={120}
                     onChange={(event) =>
                       setCreateForm((prev) => ({
                         ...prev,
@@ -431,6 +461,8 @@ function App() {
                   <textarea
                     rows={4}
                     value={createForm.description}
+                    minLength={10}
+                    maxLength={2000}
                     onChange={(event) =>
                       setCreateForm((prev) => ({
                         ...prev,
@@ -591,6 +623,8 @@ function App() {
                           <input
                             type="text"
                             value={editForm.title}
+                            minLength={3}
+                            maxLength={120}
                             onChange={(event) =>
                               setEditForm((prev) => ({
                                 ...prev,
@@ -604,6 +638,8 @@ function App() {
                           <textarea
                             rows={3}
                             value={editForm.description}
+                            minLength={10}
+                            maxLength={2000}
                             onChange={(event) =>
                               setEditForm((prev) => ({
                                 ...prev,

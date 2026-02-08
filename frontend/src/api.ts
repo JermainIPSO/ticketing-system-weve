@@ -47,8 +47,26 @@ const request = async <T>(path: string, options: RequestInit = {}) => {
   }
 
   if (!response.ok) {
-    const payload = await response.json().catch(() => ({} as { message?: string }));
-    const message = payload?.message ?? 'Request failed';
+    const payload = await response
+      .json()
+      .catch(
+        () =>
+          ({} as {
+            message?: string;
+            issues?: Array<{ path?: Array<string | number>; message?: string }>;
+          })
+      );
+    const firstIssue = Array.isArray(payload.issues) ? payload.issues[0] : undefined;
+    const issuePath =
+      firstIssue && Array.isArray(firstIssue.path) && firstIssue.path.length > 0
+        ? `${firstIssue.path.join('.')}: `
+        : '';
+    const issueMessage =
+      firstIssue && typeof firstIssue.message === 'string' ? firstIssue.message : '';
+    const message =
+      issueMessage.length > 0
+        ? `${payload?.message ?? 'Validation failed'} (${issuePath}${issueMessage})`
+        : payload?.message ?? 'Request failed';
     throw new Error(message);
   }
 
