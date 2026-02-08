@@ -232,6 +232,26 @@ classDiagram
 
 Damit laufen Tests auf jedem Pull-Request und Deployments nach erfolgreichem Merge auf `main`.
 
+### 3.12 Performance-, UX- und Responsive-Maßnahmen
+- **Kurze Ladezeit im Frontend:** kompakter Vite-Build mit aufgeteilten Assets und statischer Auslieferung über Netlify CDN.
+- **Schnelle UI-Reaktion:** lokale State-Updates mit anschließendem Server-Refresh, damit Bedienung konsistent und nachvollziehbar bleibt.
+- **Fehlertransparenz:** API-Fehler werden mit Feldbezug angezeigt (z. B. Validierungsfehler bei Titel/Beschreibung).
+- **Mobile Usability:** Dashboard und Ticketkarten brechen auf eine Spalte um; Action-Buttons sind auf kleinen Viewports vollflächig anklickbar.
+- **Zugänglichkeit:** formularbezogene Fehler werden als `role="alert"` ausgegeben; Browser-`autocomplete` für Login ist gesetzt.
+
+### 3.13 Abnahmetest (fachlich)
+| Testfall | Rolle | Erwartung | Ergebnis |
+|---|---|---|---|
+| Login mit Demo-Account | User/Admin | JWT wird erstellt, Dashboard lädt | Erfüllt |
+| Ticket erstellen | User | Ticket erscheint in Liste mit OPEN | Erfüllt |
+| Ticket bearbeiten | User (Owner) | Titel/Beschreibung/Priorität speicherbar | Erfüllt |
+| Ticket schließen | User (Owner) | Status wird CLOSED, Closed-Datum gesetzt | Erfüllt |
+| Ticket annehmen | Admin | Zuweisung auf Admin + Status IN_PROGRESS | Erfüllt |
+| Ticket zuweisen | Admin | `assignedTo` wird gespeichert | Erfüllt |
+| Status ändern | Admin | Statuswechsel OPEN/IN_PROGRESS/CLOSED | Erfüllt |
+| Unberechtigter Zugriff | User fremdes Ticket | Zugriff wird mit 403 abgelehnt | Erfüllt |
+| API Health | System | `/health` liefert `status: ok` | Erfüllt |
+
 ---
 
 ## 4. Lessons Learned
@@ -270,3 +290,11 @@ Damit laufen Tests auf jedem Pull-Request und Deployments nach erfolgreichem Mer
 - Source-Code als ZIP erstellt (`npm run package:submission`)
 - GitHub-Repo-Link und Deployment-Links im Dokument eingetragen
 - Upload auf campus.ipso.ch: PDF + ZIP
+
+### 5.5 Selbstcheck gegen Bewertungskriterien
+| Kriterium | Nachweis in dieser Arbeit |
+|---|---|
+| Formale Aspekte | Vollständige Gliederung, klare Fachbegriffe, Quellen, professionelle Sprache |
+| Güte der thematischen Auseinandersetzung | Variantenvergleich, Architekturbegründung, Sicherheits- und Risikoanalyse |
+| Nachvollziehbare Vorgehensweise | Durchgängiger roter Faden von Anforderungen zu Design, Implementierung und Tests |
+| Praxistaugliches Ergebnis | Rollenbasiertes Ticketing, automatisierte CI/CD, online deployte Lösung, Abnahmetest dokumentiert |

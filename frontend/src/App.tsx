@@ -393,6 +393,8 @@ function App() {
                 Benutzername
                 <input
                   type="text"
+                  autoComplete="username"
+                  placeholder="user oder admin"
                   value={loginForm.username}
                   onChange={(event) =>
                     setLoginForm((prev) => ({
@@ -407,6 +409,8 @@ function App() {
                 Passwort
                 <input
                   type="password"
+                  autoComplete="current-password"
+                  placeholder="Passwort eingeben"
                   value={loginForm.password}
                   onChange={(event) =>
                     setLoginForm((prev) => ({
@@ -417,19 +421,24 @@ function App() {
                   required
                 />
               </label>
-              {loginError && <p className="error">{loginError}</p>}
+              {loginError && (
+                <p className="error" role="alert">
+                  {loginError}
+                </p>
+              )}
               <button className="btn" type="submit" disabled={loginLoading}>
                 {loginLoading ? 'Login läuft…' : 'Einloggen'}
               </button>
             </form>
-            <div className="demo-accounts">
-              <div>
+            <div className="demo-accounts" aria-label="Demo-Accounts">
+              <p className="demo-title">Demo-Accounts</p>
+              <div className="demo-account">
                 <strong>User</strong>
-                <span>user / user123</span>
+                <code>user / user123</code>
               </div>
-              <div>
+              <div className="demo-account">
                 <strong>Admin</strong>
-                <span>admin / admin123</span>
+                <code>admin / admin123</code>
               </div>
             </div>
           </section>
@@ -455,6 +464,7 @@ function App() {
                     }
                     required
                   />
+                  <small className="hint">Mindestens 3 Zeichen</small>
                 </label>
                 <label>
                   Beschreibung
@@ -471,6 +481,7 @@ function App() {
                     }
                     required
                   />
+                  <small className="hint">Mindestens 10 Zeichen</small>
                 </label>
                 <label>
                   Priorität
@@ -568,7 +579,11 @@ function App() {
             </div>
 
             {loading && <p>Tickets laden…</p>}
-            {error && <p className="error">{error}</p>}
+            {error && (
+              <p className="error" role="alert">
+                {error}
+              </p>
+            )}
 
             {visibleTickets.length === 0 && !loading ? (
               <div className="empty-state">
@@ -632,6 +647,7 @@ function App() {
                               }))
                             }
                           />
+                          <small className="hint">Mindestens 3 Zeichen</small>
                         </label>
                         <label>
                           Beschreibung
@@ -647,6 +663,7 @@ function App() {
                               }))
                             }
                           />
+                          <small className="hint">Mindestens 10 Zeichen</small>
                         </label>
                         <label>
                           Priorität
@@ -742,6 +759,9 @@ function App() {
                             Zuweisung speichern
                           </button>
                         </div>
+                        <small className="hint">
+                          Für die Speicherung mindestens 2 Zeichen bei Zuweisung.
+                        </small>
                         <label>
                           Status
                           <select

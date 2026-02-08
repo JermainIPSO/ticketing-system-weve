@@ -251,6 +251,12 @@ textarea {
   font-weight: 600;
 }
 
+.hint {
+  margin-top: -0.1rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 .muted {
   color: var(--muted);
 }
@@ -288,6 +294,33 @@ textarea {
   border-radius: 16px;
   border: 1px dashed var(--border);
   background: rgba(255, 255, 255, 0.6);
+}
+
+.demo-title {
+  margin: 0;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.demo-account {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.demo-account strong {
+  color: var(--ink);
+}
+
+.demo-account code {
+  display: inline-block;
+  width: fit-content;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.9);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  color: #1f2937;
 }
 
 .panel-header {
@@ -494,5 +527,16 @@ textarea {
 
   .profile {
     justify-content: space-between;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actions .btn,
+  .admin-actions .btn {
+    width: 100%;
+    justify-content: center;
   }
 }
