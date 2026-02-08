@@ -1,14 +1,31 @@
-# Praxisarbeit WEVE.TA1A.PA - Webentwicklung Vertiefung
+# IPSO Bildung
 
+# Praxisarbeit WEVE.TA1A.PA
+
+## Webentwicklung Grundlagen / Webentwicklung Vertiefung
+
+**Thema:** Webbasiertes Ticketing-System für den Kundensupport  
 **Studiengang:** HFINFA, 3. Studienjahr  
-**Modul:** Webentwicklung Grundlagen / Webentwicklung Vertiefung  
 **Autor:** Jermain Huber  
 **Version:** 1.0  
 **Datum:** 08.02.2026
 
----
+<div style="page-break-after: always;"></div>
 
-## 1. Management Summary
+## 1. Inhaltsverzeichnis
+
+| Kapitel | Seite |
+|---|---:|
+| 1. Inhaltsverzeichnis | 2 |
+| 2. Management Summary | 3 |
+| 3. Analyse und Design (Architektur) | 4 |
+| 4. Implementation (inkl. Testing) | 9 |
+| 5. Lessons Learned | 16 |
+| 6. Anhang | 17 |
+
+<div style="page-break-after: always;"></div>
+
+## 2. Management Summary
 
 Ausgangslage dieser Praxisarbeit war die Aufgabe, für ein mittelständisches Unternehmen ein webbasiertes Ticketing-System für den Support zu entwickeln. Der Fokus lag auf einer modernen, wartbaren Webanwendung mit klarer Rollenlogik, zentraler Datenhaltung und einer nachvollziehbaren Continuous-Integration- und Continuous-Deployment-Kette.
 
@@ -22,13 +39,15 @@ Damit erfüllt die Lösung die gestellten Anforderungen nicht nur funktional, so
 
 ---
 
-## 2. Analyse und Design (Architektur)
+<div style="page-break-before: always;"></div>
 
-### 2.1 Ausgangslage
+## 3. Analyse und Design (Architektur)
+
+### 3.1 Ausgangslage
 
 Ein Support-Team bearbeitet täglich wiederkehrende Kundenanfragen. Ohne strukturiertes Ticketing gehen Informationen verloren, Rückfragen dauern zu lange, und Verantwortlichkeiten sind unklar. Ziel dieser Arbeit war deshalb, einen klaren, technischen und organisatorischen Prozess in einer Webanwendung abzubilden.
 
-### 2.2 Zielbild
+### 3.2 Zielbild
 
 Das Zielbild für die Lösung war:
 
@@ -39,7 +58,7 @@ Das Zielbild für die Lösung war:
 - automatisierte Tests und Deployments
 - einfache Prüfbarkeit für Examinatoren
 
-### 2.3 Projektabgrenzung
+### 3.3 Projektabgrenzung
 
 Nicht Bestandteil der Umsetzung waren:
 
@@ -51,7 +70,7 @@ Nicht Bestandteil der Umsetzung waren:
 
 Diese Punkte sind für einen produktiven Ausbau relevant, aber für den Umfang der Praxisarbeit bewusst ausgegrenzt.
 
-### 2.4 Stakeholder und Erwartungen
+### 3.4 Stakeholder und Erwartungen
 
 | Stakeholder | Erwartung | Relevanz für die Umsetzung |
 |---|---|---|
@@ -61,7 +80,7 @@ Diese Punkte sind für einen produktiven Ausbau relevant, aber für den Umfang d
 | IT-Betrieb | stabiler und sicherer Betrieb | CI/CD, Healthcheck, CORS, Rate Limiting |
 | Examinator | nachvollziehbare Facharbeit | Architekturbegründung, Tests, Doku, Live-Links |
 
-### 2.5 Funktionale Anforderungen
+### 3.5 Funktionale Anforderungen
 
 | ID | Anforderung | Muss/Soll | Umsetzungsstatus |
 |---|---|---|---|
@@ -75,7 +94,7 @@ Diese Punkte sind für einen produktiven Ausbau relevant, aber für den Umfang d
 | F8 | Node.js Backend | Muss | Erfüllt |
 | F9 | Webservice-Kommunikation | Muss | Erfüllt (REST) |
 
-### 2.6 Nicht-funktionale Anforderungen
+### 3.6 Nicht-funktionale Anforderungen
 
 | ID | Ziel | Messgrösse |
 |---|---|---|
@@ -86,7 +105,7 @@ Diese Punkte sind für einen produktiven Ausbau relevant, aber für den Umfang d
 | N5 | Betrieb | automatisches Deployment nach erfolgreichem CI |
 | N6 | Usability | responsive Layout, klare Rollenführung, eindeutige Fehlertexte |
 
-### 2.7 Lösungsvarianten
+### 3.7 Lösungsvarianten
 
 #### Variante A: React + Express + REST + SQL (ausgewählt)
 
@@ -103,7 +122,7 @@ Diese Punkte sind für einen produktiven Ausbau relevant, aber für den Umfang d
 - **Pro:** starke Struktur, flexible Queries
 - **Contra:** höherer Initialaufwand für diese Aufgabenstellung
 
-### 2.8 Entscheidmatrix
+### 3.8 Entscheidmatrix
 
 Bewertungsskala: 1 (schwach) bis 5 (sehr gut)
 
@@ -119,7 +138,7 @@ Bewertungsskala: 1 (schwach) bis 5 (sehr gut)
 
 **Begründung:** Variante A liefert die beste Balance aus Aufwand, Qualität und Praxistauglichkeit. Deshalb wurde diese Variante umgesetzt.
 
-### 2.9 Systemkontextdiagramm
+### 3.9 Systemkontextdiagramm
 
 ```mermaid
 flowchart LR
@@ -130,7 +149,7 @@ flowchart LR
   API -->|JWT Auth| FE
 ```
 
-### 2.10 Komponentenarchitektur (Big Picture)
+### 3.10 Komponentenarchitektur (Big Picture)
 
 ```mermaid
 flowchart TB
@@ -166,7 +185,7 @@ flowchart TB
   B1 --> B5
 ```
 
-### 2.11 Fachlicher Prozess (Soll-Prozess)
+### 3.11 Fachlicher Prozess (Soll-Prozess)
 
 1. User erfasst Ticket (`OPEN`).
 2. Admin übernimmt oder weist Ticket zu (`assignedTo`).
@@ -174,7 +193,7 @@ flowchart TB
 4. Abschluss erfolgt nur mit dokumentierter Ursache/Lösung (`resolutionNote`).
 5. Ticketstatus wechselt auf `CLOSED` und `closedAt` wird gesetzt.
 
-### 2.12 Datenfluss
+### 3.12 Datenfluss
 
 ```mermaid
 flowchart LR
@@ -187,7 +206,7 @@ flowchart LR
   DB -->|Result| API --> U
 ```
 
-### 2.13 Use Cases
+### 3.13 Use Cases
 
 #### UC-1: User erstellt und schliesst Ticket
 
@@ -216,7 +235,7 @@ flowchart LR
 - **Szenario:** Admin versucht Ticket zu erstellen oder User will Ticket ausserhalb `OPEN` bearbeiten.
 - **Systemreaktion:** API liefert definierte Fehlerantwort (`403` oder `409`) mit klarer Meldung.
 
-### 2.14 Risikoanalyse und Gegenmassnahmen
+### 3.14 Risikoanalyse und Gegenmassnahmen
 
 | Risiko | Eintritt | Auswirkung | Gegenmassnahme |
 |---|---|---|---|
@@ -228,9 +247,11 @@ flowchart LR
 
 ---
 
-## 3. Implementation (inkl. Testing)
+<div style="page-break-before: always;"></div>
 
-### 3.1 Technischer Überblick
+## 4. Implementation (inkl. Testing)
+
+### 4.1 Technischer Überblick
 
 Der Stack wurde bewusst schlank gehalten:
 
@@ -243,7 +264,7 @@ Der Stack wurde bewusst schlank gehalten:
 - Tests: Vitest, Supertest, React Testing Library
 - CI/CD: GitHub Actions, Netlify, Render
 
-### 3.2 Projektstruktur
+### 4.2 Projektstruktur
 
 ```text
 /backend
@@ -268,21 +289,21 @@ Der Stack wurde bewusst schlank gehalten:
   deploy.yml
 ```
 
-### 3.3 Backend-Implementierung
+### 4.3 Backend-Implementierung
 
-#### 3.3.1 Start und Konfiguration
+#### 4.3.1 Start und Konfiguration
 
 - Environment wird zentral in `env.ts` geprüft.
 - Beim Start wird das Schema sichergestellt (`ensureSchema`).
 - Ein `/health`-Endpoint liefert den Betriebsstatus.
 
-#### 3.3.2 Authentifizierung
+#### 4.3.2 Authentifizierung
 
 - Login via `POST /auth/login` mit Demo-Accounts.
 - Bei Erfolg liefert die API JWT + User-Rolle.
 - Geschützte Endpunkte erwarten `Authorization: Bearer <token>`.
 
-#### 3.3.3 Business Rules im Ticket-Flow
+#### 4.3.3 Business Rules im Ticket-Flow
 
 Die fachlichen Regeln sind serverseitig durchgesetzt:
 
@@ -292,30 +313,30 @@ Die fachlichen Regeln sind serverseitig durchgesetzt:
 - Abschluss verlangt `resolutionNote` (min. 10 Zeichen).
 - Admin kann zuweisen und den Bearbeitungsstatus steuern.
 
-### 3.4 Frontend-Implementierung
+### 4.4 Frontend-Implementierung
 
-#### 3.4.1 Login und Rollenführung
+#### 4.4.1 Login und Rollenführung
 
 - Login-View mit klaren Demo-Zugängen (`user/user123`, `admin/admin123`).
 - Nach Login wird die Rolle im UI sofort sichtbar.
 - UI blendet Ticket-Erfassung für Admin aus und zeigt stattdessen Admin-Hinweis.
 
-#### 3.4.2 Ticket-Übersicht
+#### 4.4.2 Ticket-Übersicht
 
 - Suche über Titel, Beschreibung, Ersteller und Zuweisung.
 - Filter nach Status und Priorität.
 - Sortierung nach letzter Änderung, Erstellung oder Priorität.
 - Kennzahlen (Total, Backlog, Closed Rate, In Arbeit) werden live berechnet.
 
-#### 3.4.3 Ticket-Aktionen
+#### 4.4.3 Ticket-Aktionen
 
 - User sieht Bearbeiten nur, wenn eigenes Ticket und Status `OPEN`.
 - Schliessen erfolgt über separates Formular mit Pflichtfeld für Lösung/Ursache.
 - Admin hat Zusatzbereich für Übernahme, Zuweisung und Statussteuerung.
 
-### 3.5 Datenbank und Modell
+### 4.5 Datenbank und Modell
 
-#### 3.5.1 Modell
+#### 4.5.1 Modell
 
 `Ticket` enthält die Felder:
 
@@ -329,13 +350,13 @@ Die fachlichen Regeln sind serverseitig durchgesetzt:
 - `resolutionNote` (optional, aber bei Abschluss Pflicht)
 - `createdAt`, `updatedAt`, `closedAt`
 
-#### 3.5.2 Persistenzstrategie
+#### 4.5.2 Persistenzstrategie
 
 - Lokal: SQLite für schnelle Entwicklung.
 - Produktion: gleicher Prisma-Layer, DB via `DATABASE_URL` austauschbar.
 - Schema wird beim Start abgesichert, damit lokale Entwicklungsumgebungen robust bleiben.
 
-### 3.6 API-Vertrag (kompakt)
+### 4.6 API-Vertrag (kompakt)
 
 | Methode | Endpoint | Zweck | Auth |
 |---|---|---|---|
@@ -348,7 +369,7 @@ Die fachlichen Regeln sind serverseitig durchgesetzt:
 | PATCH | `/tickets/:id/status` | Bearbeitungsstatus ändern (Admin) | ja |
 | POST | `/tickets/:id/close` | Abschluss mit Notiz | ja |
 
-### 3.7 Testkonzept
+### 4.7 Testkonzept
 
 Die Teststrategie trennt Frontend und Backend:
 
@@ -356,7 +377,7 @@ Die Teststrategie trennt Frontend und Backend:
 - **Frontend Unittest:** zentrale UI-Render- und Login-Pfade
 - **CI-Lauf:** jeder PR und jeder Push auf `main`
 
-#### 3.7.1 Geprüfte Backend-Szenarien
+#### 4.7.1 Geprüfte Backend-Szenarien
 
 - `GET /health` liefert `200` und `status: ok`
 - User kann Ticket erstellen und listen
@@ -365,7 +386,7 @@ Die Teststrategie trennt Frontend und Backend:
 - Owner darf nur in `OPEN` bearbeiten
 - Abschluss ohne Notiz wird validierungsseitig blockiert
 
-#### 3.7.2 Lokale Testbefehle
+#### 4.7.2 Lokale Testbefehle
 
 ```bash
 npm test
@@ -374,16 +395,16 @@ npm run build
 
 Beide Befehle laufen im aktuellen Stand ohne Fehler.
 
-### 3.8 CI/CD-Umsetzung
+### 4.8 CI/CD-Umsetzung
 
-#### 3.8.1 CI (`ci.yml`)
+#### 4.8.1 CI (`ci.yml`)
 
 - Checkout
 - Node Setup
 - `npm ci`
 - `npm test`
 
-#### 3.8.2 Deploy (`deploy.yml`)
+#### 4.8.2 Deploy (`deploy.yml`)
 
 - Trigger nach erfolgreichem CI auf `main`
 - Frontend Build + Deploy zu Netlify
@@ -391,9 +412,9 @@ Beide Befehle laufen im aktuellen Stand ohne Fehler.
 
 Damit ist sichergestellt, dass nur geprüfter Code in die Live-Umgebung gelangt.
 
-### 3.9 Deployment-Konfiguration
+### 4.9 Deployment-Konfiguration
 
-#### 3.9.1 GitHub Secrets
+#### 4.9.1 GitHub Secrets
 
 | Secret | Zweck |
 |---|---|
@@ -402,7 +423,7 @@ Damit ist sichergestellt, dass nur geprüfter Code in die Live-Umgebung gelangt.
 | `VITE_API_URL` | API-Basis-URL für Frontend Build |
 | `RENDER_DEPLOY_HOOK_URL` | Trigger für Backend Deploy |
 
-#### 3.9.2 Render Environment Variables
+#### 4.9.2 Render Environment Variables
 
 | Variable | Wertbeispiel |
 |---|---|
@@ -410,7 +431,7 @@ Damit ist sichergestellt, dass nur geprüfter Code in die Live-Umgebung gelangt.
 | `CORS_ORIGIN` | `https://weve-ticketing-system-jermain.netlify.app` |
 | `DATABASE_URL` | SQL-Verbindungsstring |
 
-### 3.10 Performance und UX
+### 4.10 Performance und UX
 
 Massnahmen für gute Bedienbarkeit:
 
@@ -420,7 +441,7 @@ Massnahmen für gute Bedienbarkeit:
 - kurze, klare Fehlermeldungen mit Ursache
 - responsive Layout für Desktop und Mobile
 
-### 3.11 Security-Massnahmen
+### 4.11 Security-Massnahmen
 
 - JWT-gesicherte Endpunkte
 - Eingabekontrolle mit Zod
@@ -428,7 +449,7 @@ Massnahmen für gute Bedienbarkeit:
 - Rate Limiting gegen brute-force und abuse
 - CORS mit erlaubten Origins
 
-### 3.12 Betrieb und Abnahmefreundlichkeit
+### 4.12 Betrieb und Abnahmefreundlichkeit
 
 Die Lösung ist so vorbereitet, dass ein Examinator ohne lokale Installation prüfen kann.
 
@@ -444,7 +465,7 @@ Die Lösung ist so vorbereitet, dass ein Examinator ohne lokale Installation pr�
 - Erster API-Request kann dadurch bis ca. 50 Sekunden brauchen.
 - Backend Root (`/`) zeigt bewusst `{"message":"Not Found"}`; relevante Endpunkte sind `/health`, `/auth/login`, `/tickets`.
 
-### 3.13 Traceability (Anforderung -> Nachweis)
+### 4.13 Traceability (Anforderung -> Nachweis)
 
 | Anforderung | Technischer Nachweis |
 |---|---|
@@ -459,7 +480,7 @@ Die Lösung ist so vorbereitet, dass ein Examinator ohne lokale Installation pr�
 | Webservices | REST JSON |
 | CI/CD | GitHub Actions + Netlify + Render |
 
-### 3.14 Fachliche Bewertung der Lösung
+### 4.14 Fachliche Bewertung der Lösung
 
 Die Rollenlogik wurde bewusst strikt gebaut. In vielen einfachen Ticket-Tools kann jeder fast alles bearbeiten. Für einen prüfungsrelevanten und auditierbaren Prozess ist das nicht ideal. Mit der aktuellen Logik bleibt nachvollziehbar:
 
@@ -470,11 +491,11 @@ Die Rollenlogik wurde bewusst strikt gebaut. In vielen einfachen Ticket-Tools ka
 
 Damit ist das Ergebnis nicht nur funktional, sondern auch fachlich begründbar.
 
-### 3.15 Betriebs-Runbook (für Demo und produktionsnahen Betrieb)
+### 4.15 Betriebs-Runbook (für Demo und produktionsnahen Betrieb)
 
 Damit die Anwendung im Live-Test reproduzierbar prüfbar ist, wurde ein kleines Runbook definiert. Dieses Kapitel ist bewusst operativ formuliert, weil in der Praxis nicht nur der Code zählt, sondern auch ein stabiler Ablauf beim Betrieb.
 
-#### 3.15.1 Pre-Deploy-Checkliste
+#### 4.15.1 Pre-Deploy-Checkliste
 
 Vor jedem Merge auf `main`:
 
@@ -484,7 +505,7 @@ Vor jedem Merge auf `main`:
 4. geänderte Business Rules sind in der Doku nachgezogen
 5. bei API-Änderung: Frontend-Client geprüft
 
-#### 3.15.2 Deploy-Ablauf in Kurzform
+#### 4.15.2 Deploy-Ablauf in Kurzform
 
 1. Push auf `main`
 2. GitHub Action `CI` startet und testet Frontend + Backend
@@ -493,7 +514,7 @@ Vor jedem Merge auf `main`:
 5. Render wird über Deploy Hook neu gestartet
 6. Healthcheck prüfen (`/health`)
 
-#### 3.15.3 Post-Deploy-Smoke-Test
+#### 4.15.3 Post-Deploy-Smoke-Test
 
 Direkt nach dem Deployment wird ein kurzer Funktionstest ausgeführt:
 
@@ -506,7 +527,7 @@ Direkt nach dem Deployment wird ein kurzer Funktionstest ausgeführt:
 
 Dieser Ablauf dauert in der Regel unter 3 Minuten und reduziert das Risiko, unbemerkt einen Regression-Fehler in Produktion zu haben.
 
-#### 3.15.4 Rollback-Strategie
+#### 4.15.4 Rollback-Strategie
 
 Im aktuellen Setup (Netlify + Render + GitHub) kann ein Rollback pragmatisch erfolgen:
 
@@ -516,7 +537,7 @@ Im aktuellen Setup (Netlify + Render + GitHub) kann ein Rollback pragmatisch erf
 
 Für diese Praxisarbeit wurde bewusst auf komplexe Migrationen verzichtet. Deshalb ist das Risiko für irreversible Datenfehler tief.
 
-### 3.16 Troubleshooting-Leitfaden
+### 4.16 Troubleshooting-Leitfaden
 
 | Symptom | Wahrscheinliche Ursache | Massnahme |
 |---|---|---|
@@ -528,7 +549,7 @@ Für diese Praxisarbeit wurde bewusst auf komplexe Migrationen verzichtet. Desha
 | Admin kann kein Ticket erstellen | fachliche Regel aktiv | gewolltes Verhalten, Ticket muss durch User ausgelöst werden |
 | Ticket lässt sich nicht mehr bearbeiten | Ticket ist nicht mehr `OPEN` | ebenfalls gewolltes Verhalten laut Prozess |
 
-#### 3.16.1 Typische Fehlerbilder aus der Umsetzung
+#### 4.16.1 Typische Fehlerbilder aus der Umsetzung
 
 Während der Implementierung sind vor allem drei Fehlerarten aufgetreten:
 
@@ -541,7 +562,7 @@ Während der Implementierung sind vor allem drei Fehlerarten aufgetreten:
 
 Diese Punkte wurden bewusst dokumentiert, weil sie in realen Projekten sehr häufig sind und viel Zeit kosten können, wenn sie nicht strukturiert analysiert werden.
 
-### 3.17 Qualitätsnachweis entlang der Bewertungslogik
+### 4.17 Qualitätsnachweis entlang der Bewertungslogik
 
 Das Projekt wurde nicht nur auf Funktionsfähigkeit geprüft, sondern explizit entlang der erwarteten Bewertungskriterien ausgerichtet:
 
@@ -554,9 +575,11 @@ Diese Zuordnung ist für die Abschlussbewertung zentral, weil sie zeigt, dass ni
 
 ---
 
-## 4. Lessons Learned
+<div style="page-break-before: always;"></div>
 
-### 4.1 Technische Erkenntnisse
+## 5. Lessons Learned
+
+### 5.1 Technische Erkenntnisse
 
 1. **Business Rules gehören ins Backend.**
    Nur UI-Regeln reichen nicht. Entscheidend ist, dass die API unzulässige Aktionen blockiert.
@@ -570,7 +593,7 @@ Diese Zuordnung ist für die Abschlussbewertung zentral, weil sie zeigt, dass ni
 4. **CORS ist ein typischer Stolperstein.**
    Lokale URL, Netlify-URL und Produktions-API müssen konsistent konfiguriert sein.
 
-### 4.2 Methodische Erkenntnisse
+### 5.2 Methodische Erkenntnisse
 
 1. **Architekturvarianten zuerst vergleichen.**
    Das macht spätere Entscheidungen nachvollziehbar und sauber begründbar.
@@ -581,7 +604,7 @@ Diese Zuordnung ist für die Abschlussbewertung zentral, weil sie zeigt, dass ni
 3. **Dokumentation ist Teil der Lösung, nicht Anhang.**
    Eine gute technische Umsetzung ohne nachvollziehbare Dokumentation verliert in der Bewertung.
 
-### 4.3 Nächste sinnvolle Ausbauschritte
+### 5.3 Nächste sinnvolle Ausbauschritte
 
 - Dateianhänge am Ticket
 - E-Mail-Benachrichtigungen bei Statuswechsel
@@ -589,7 +612,7 @@ Diese Zuordnung ist für die Abschlussbewertung zentral, weil sie zeigt, dass ni
 - Dashboard mit Zeitreihen (Durchlaufzeit, Backlog-Entwicklung)
 - Rollenmodell mit mehreren Admin-Gruppen
 
-### 4.4 Persönliche Reflexion zur Umsetzung
+### 5.4 Persönliche Reflexion zur Umsetzung
 
 Rückblickend war der wichtigste Lernerfolg, Business Rules und technische Umsetzung nicht getrennt zu betrachten. Die entscheidenden Qualitätspunkte lagen nicht bei der Anzahl Features, sondern bei der Frage, ob der Prozess im Code konsistent erzwungen wird. Genau dort lag der grösste Mehrwert:
 
@@ -603,9 +626,11 @@ Ein zweiter wichtiger Punkt war die Bedeutung einer sauberen End-to-End-Sicht: E
 
 ---
 
-## 5. Anhang
+<div style="page-break-before: always;"></div>
 
-### 5.1 Projektstruktur (Kurzform)
+## 6. Anhang
+
+### 6.1 Projektstruktur (Kurzform)
 
 ```text
 /backend   API + Datenzugriff
@@ -613,7 +638,7 @@ Ein zweiter wichtiger Punkt war die Bedeutung einer sauberen End-to-End-Sicht: E
 /docs      Report + PDF
 ```
 
-### 5.2 Experten-Schnelltest (Live)
+### 6.2 Experten-Schnelltest (Live)
 
 1. Frontend öffnen: `https://weve-ticketing-system-jermain.netlify.app`
 2. Login als User: `user / user123`
@@ -622,7 +647,7 @@ Ein zweiter wichtiger Punkt war die Bedeutung einer sauberen End-to-End-Sicht: E
 5. Ticket übernehmen, zuweisen und Status prüfen
 6. Backend Health prüfen: `https://weve-ticketing-api-jermain.onrender.com/health`
 
-### 5.3 Testprotokoll für die Abnahme
+### 6.3 Testprotokoll für die Abnahme
 
 | Schritt | Erwartung |
 |---|---|
@@ -634,7 +659,7 @@ Ein zweiter wichtiger Punkt war die Bedeutung einer sauberen End-to-End-Sicht: E
 | Abschluss mit Notiz | Ticket wird `CLOSED`, Notiz sichtbar |
 | Admin erstellt Ticket direkt | blockiert (`403`) |
 
-### 5.4 Quellen
+### 6.4 Quellen
 
 - OWASP Top 10: https://owasp.org/www-project-top-ten/
 - React Dokumentation: https://react.dev
@@ -645,13 +670,13 @@ Ein zweiter wichtiger Punkt war die Bedeutung einer sauberen End-to-End-Sicht: E
 - Render Dokumentation: https://render.com/docs
 - Netlify Dokumentation: https://docs.netlify.com
 
-### 5.5 Projektreferenzen
+### 6.5 Projektreferenzen
 
 - GitHub: `https://github.com/JermainIPSO/ticketing-system-weve`
 - Frontend: `https://weve-ticketing-system-jermain.netlify.app`
 - Backend: `https://weve-ticketing-api-jermain.onrender.com`
 
-### 5.6 Abgabe-Checkliste
+### 6.6 Abgabe-Checkliste
 
 - [x] Management Summary vorhanden
 - [x] Analyse und Design dokumentiert
@@ -662,7 +687,7 @@ Ein zweiter wichtiger Punkt war die Bedeutung einer sauberen End-to-End-Sicht: E
 - [x] PDF erzeugt
 - [x] Source-Code für ZIP bereit
 
-### 5.7 Selbstcheck gegen Bewertungskriterien
+### 6.7 Selbstcheck gegen Bewertungskriterien
 
 | Kriterium | Selbstbewertung |
 |---|---|
@@ -671,7 +696,7 @@ Ein zweiter wichtiger Punkt war die Bedeutung einer sauberen End-to-End-Sicht: E
 | Nachvollziehbare Vorgehensweise | roter Faden von Anforderungen über Design bis Test und Deploy durchgehend sichtbar |
 | Praxistaugliches Ergebnis | live lauffähiges System mit rollenbasiertem Prozess, automatisierten Tests und Deployment |
 
-### 5.8 Architekturentscheidungen (ADR-Auszug)
+### 6.8 Architekturentscheidungen (ADR-Auszug)
 
 #### ADR-01: REST statt GraphQL
 
